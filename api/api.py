@@ -4,42 +4,57 @@ from flask import request
 from flask import jsonify
 from flask_cors import CORS
 
-from pythonosc import udp_client
-from pythonosc import osc_bundle_builder
-from pythonosc import osc_message_builder
+
+from osc4py3.as_eventloop import *
+from osc4py3 import oscbuildparse
 
 app = Flask(__name__)
 CORS(app)
 
-client = udp_client.SimpleUDPClient("localhost", 5005)
+
+# Start the system.
+osc_startup()
+osc_udp_client("127.0.0.1", 5005, "local")
+
+
+data_bundle = {
+    'fundamentals': [2000, 2000, 2000, 2000],
+    'harmonicities': [0.5, 0.5, 0.5, 0.5],
+    'amp_curves': [5000, 5000, 5000, 5000],
+    'delay_multiples': [0.5, 0.5, 0.5, 0.5],
+    'delay_feebacks': [0.5, 0.5, 0.5, 0.5]
+}
+uuid_to_index = {}
+counter = 0
+
 
 @app.route('/api/query', methods = ['POST'])
 def get_query_from_react():
     req = request.get_json()
-    send_osc_packet(req['fundamental'], req['harmonicity'], req['decay']
-        ,req['exp_base'], req['scalar'])
+    update_osc_packet(req['uuid'], req['fundamental'], req['harmonicity'],
+        req['decay'], req['exp_base'], req['scalar'])
     return req
 
-def send_osc_packet(funda, harmon, decay, exp_base, scalar):
-    bundle = osc_bundle_builder.OscBundleBuilder(
-    osc_bundle_builder.IMMEDIATELY)
 
-    msg = osc_message_builder.OscMessageBuilder(address="/fundamental")
-    msg.add_arg(funda)
-    msg2 = osc_message_builder.OscMessageBuilder(address="/harmonicity")
-    msg2.add_arg(harmon)
-    msg3 = osc_message_builder.OscMessageBuilder(address="/decay")
-    msg3.add_arg(decay)
-    msg4 = osc_message_builder.OscMessageBuilder(address="/amp_exponential_base")
-    msg4.add_arg(exp_base)
-    msg5 = osc_message_builder.OscMessageBuilder(address="/amp_scalar")
-    msg5.add_arg(scalar)
+def update_osc_packet(uuid, funda, harmon, decay, exp_base, scalar):
 
+    if uuid not in uuid_to_index:
+        uuid_to_index[uuid] = len(uuid_to_index.keys())
 
-    bundle.add_content(msg.build())
-    bundle.add_content(msg2.build())
-    bundle.add_content(msg3.build())
-    bundle.add_content(msg4.build())
-    bundle.add_content(msg5.build())
-    bundle = bundle.build()
-    client.send(bundle)
+    index_to_update = uuid_to_index[uuid]
+
+    data_bundle['fundamentals'][index_to_update] = funda
+    data_bundle['harmonicities'][index_to_update] = harmon
+    data_bundle['decays'][index_to_update] = decay
+    data_bundle['amp_bases'][index_to_update] = exp_base
+    data_bundle['amp_scalars'][index_to_update] = scalar
+
+    msg1 = oscbuildparse.OSCMessage("/fundamental", None, data_bundle['fundamentals'])
+    msg2 = oscbuildparse.OSCMessage("/harmonicity", None, data_bundle['harmonicities'])
+    msg3 = oscbuildparse.OSCMessage("/amp_curve", None, data_bundle['amp_curves'])
+    msg4 = oscbuildparse.OSCMessage("/delay/multiple", None, data_bundle['delay_multiples'])
+    msg5 = oscbuildparse.OSCMessage("/delay/feedback", None, data_bundle['delay_feebacks'])
+    bun = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY,
+                        [msg1, msg2, msg3, msg4, msg5])
+    osc_send(bun, "local")
+    osc_process()

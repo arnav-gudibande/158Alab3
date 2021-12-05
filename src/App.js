@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
+import uuid from "uuid";
 import './App.css';
 
 import Box from '@mui/material/Box';
@@ -11,6 +12,7 @@ import axios from 'axios'
 function App() {
 
     var myParams = {
+        'uuid': uuid.v4(),
         'fundamental': 2000,
         'harmonicity': 0.5,
         'decay': 5000,
