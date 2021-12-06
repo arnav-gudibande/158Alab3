@@ -3,6 +3,7 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from flask_cors import CORS
+from scipy.io import wavfile
 
 
 from osc4py3.as_eventloop import *
@@ -36,7 +37,17 @@ def get_query_from_react():
     return req
 
 
-def update_osc_packet(uuid, funda, harmon, decay, exp_base, scalar):
+@app.route('/api/audio', methods = ['POST'])
+def get_audio_from_react():
+    req = request.files['file']
+    print(type(req))
+    req.save(req.filename)
+    samplerate, data = wavfile.read(req.filename)
+    print(data[:5])
+    return "success"
+
+
+def update_osc_packet(uuid, funda, harmon, curves, multiple, feedback):
 
     if uuid not in uuid_to_index:
         uuid_to_index[uuid] = len(uuid_to_index.keys())
@@ -45,9 +56,9 @@ def update_osc_packet(uuid, funda, harmon, decay, exp_base, scalar):
 
     data_bundle['fundamentals'][index_to_update] = funda
     data_bundle['harmonicities'][index_to_update] = harmon
-    data_bundle['decays'][index_to_update] = decay
-    data_bundle['amp_bases'][index_to_update] = exp_base
-    data_bundle['amp_scalars'][index_to_update] = scalar
+    data_bundle['amp_curves'][index_to_update] = curves
+    data_bundle['delay_multiples'][index_to_update] = multiple
+    data_bundle['delay_feebacks'][index_to_update] = feedback
 
     msg1 = oscbuildparse.OSCMessage("/fundamental", None, data_bundle['fundamentals'])
     msg2 = oscbuildparse.OSCMessage("/harmonicity", None, data_bundle['harmonicities'])
