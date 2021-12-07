@@ -2,7 +2,7 @@ import time
 from flask import Flask
 from flask import request
 from flask import jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from scipy.io import wavfile
 
 
@@ -10,7 +10,8 @@ from osc4py3.as_eventloop import *
 from osc4py3 import oscbuildparse
 
 app = Flask(__name__)
-CORS(app)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 # Start the system.
@@ -32,6 +33,7 @@ counter = 0
 
 
 @app.route('/api/control', methods = ['POST'])
+@cross_origin()
 def get_query_from_react():
     req = request.get_json()
     update_osc_packet(req)
@@ -39,6 +41,7 @@ def get_query_from_react():
 
 
 @app.route('/api/io', methods = ['POST'])
+@cross_origin()
 def get_io_query_from_react():
     req = request.get_json()
     update_osc_packet(req)
