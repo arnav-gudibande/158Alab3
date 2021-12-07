@@ -1,0 +1,14 @@
+certifi==2021.10.8
+click==8.0.3
+Flask @ file:///tmp/build/80754af9/flask_1634118196080/work
+Flask-Cors==3.0.10
+itsdangerous @ file:///tmp/build/80754af9/itsdangerous_1621432558163/work
+Jinja2 @ file:///tmp/build/80754af9/jinja2_1635780242639/work
+MarkupSafe @ file:///opt/concourse/worker/volumes/live/c9141381-1dba-485b-7c96-99007bf7bcfd/volume/markupsafe_1621528150226/work
+numpy==1.21.4
+osc4py3==1.0.8
+pygame==2.1.0
+python-osc==1.8.0
+scipy==1.7.3
+six==1.16.0
+Werkzeug @ file:///tmp/build/80754af9/werkzeug_1635505089296/work
