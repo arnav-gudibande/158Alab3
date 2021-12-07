@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
 import AudioVisualizer from './AudioVisualizer';
+import Typography from '@mui/material/Typography';
+
+import uuid from "uuid";
+import request from './request';
 
 class AudioAnalyzer extends Component {
   constructor(props) {
     super(props);
-    this.state = { audioData: new Uint8Array(0) };
+    this.state = {
+        audioData: new Uint8Array(0),
+        maxAudioFreq: null,
+    };
     this.tick = this.tick.bind(this);
   }
 
@@ -21,8 +28,19 @@ class AudioAnalyzer extends Component {
   tick() {
     this.analyser.getByteTimeDomainData(this.dataArray);
     this.setState({ audioData: this.dataArray });
-    console.log(Math.max(...this.state.audioData));
+    this.setState({ maxAudioFreq: Math.max(...this.state.audioData)});
     this.rafId = requestAnimationFrame(this.tick);
+
+    if (this.state.audioData != null) {
+        const reqDict = {'frequency': (this.state.maxAudioFreq/255 * 10) - 5}
+
+        request.post('/io', reqDict)
+            .then(function(response){
+                console.log(response);
+            });
+    } else {
+        console.log("audioData null, ignoring")
+    }
   }
 
   componentWillUnmount() {
@@ -32,7 +50,14 @@ class AudioAnalyzer extends Component {
   }
 
   render() {
-    return <AudioVisualizer audioData={this.state.audioData} />;
+    return (
+        <div>
+            <AudioVisualizer audioData={this.state.audioData} />
+            <Typography id="thing1" gutterBottom>
+              Max Audio Freq: {this.state.maxAudioFreq}
+            </Typography>
+        </div>
+    )
   }
 }
 

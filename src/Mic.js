@@ -34,12 +34,12 @@ class Mic extends Component {
   render() {
     return (
       <div className="Mic">
+        {this.state.audio ? <AudioAnalyzer audio={this.state.audio} /> : ''}
         <div className="controls">
           <button onClick={this.toggleMicrophone}>
-            {this.state.audio ? 'Stop microphone' : 'Get microphone input'}
+            {this.state.audio ? 'Stop Mic' : 'Activate Mic'}
           </button>
         </div>
-        {this.state.audio ? <AudioAnalyzer audio={this.state.audio} /> : ''}
       </div>
     );
   }
