@@ -78,7 +78,7 @@ def update_osc_packet(reqDict):
     msg3 = oscbuildparse.OSCMessage("/amp_curve", None, data_bundle['amp_curves'])
     msg4 = oscbuildparse.OSCMessage("/delay/multiple", None, data_bundle['delay_multiples'])
     msg5 = oscbuildparse.OSCMessage("/delay/feedback", None, data_bundle['delay_feebacks'])
-    msg6 = oscbuildparse.OSCMessage("/keyNum", None, [data_bundle['keyNum']])
+    msg6 = oscbuildparse.OSCMessage("/keynum", None, [data_bundle['keyNum']])
     msg7 = oscbuildparse.OSCMessage("/frequency", None, [data_bundle['frequency']])
     bun = oscbuildparse.OSCBundle(oscbuildparse.OSC_IMMEDIATELY,
                         [msg1, msg2, msg3, msg4, msg5, msg6, msg7])
